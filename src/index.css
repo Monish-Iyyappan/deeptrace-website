@@ -1,0 +1,167 @@
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0d141d;
+    color: #dce3f0;
+    scroll-behavior: auto !important; /* Managed by Lenis */
+  }
+  body {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* Custom Tactical Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080f18;
+}
+::-webkit-scrollbar-thumb {
+  background: #006970;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
+
+/* Font Assignments */
+.font-orbitron, h1, h2, h3, h4, .font-headline-xl, .font-headline-lg, .font-headline-md, .font-headline-sm, .font-mono, button, .tracking-wider, .tracking-widest {
+  font-family: 'Orbitron', 'Space Mono', monospace !important;
+  letter-spacing: 0.05em;
+}
+
+.font-label-lg, .font-label-md, .font-label-sm, [class*='font-label-'], .v-step-marker, [class*='text-label-'] {
+  font-family: 'Oxanium', 'Chakra Petch', 'JetBrains Mono', monospace !important;
+}
+
+#sticky-nav-header, #vertical-hud-nav, .telemetry-readout {
+  font-family: 'Chakra Petch', 'Oxanium', monospace !important;
+}
+
+/* Keyframe Animations */
+@keyframes sonar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes sonar-blip {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.9));
+  }
+}
+
+@keyframes sonar-ring-expand {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes crt-scanline {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+.radar-sweep-beam {
+  animation: sonar-sweep 4s linear infinite;
+}
+
+.sonar-target-blip {
+  animation: sonar-blip 2s ease-in-out infinite;
+}
+
+.sonar-echo-ring {
+  animation: sonar-ring-expand 3s cubic-bezier(0.1, 0.6, 0.2, 1) infinite;
+}
+
+/* CRT Scanline Overlay */
+.hud-scanline-overlay {
+  background: linear-gradient(rgba(0, 240, 255, 0) 50%, rgba(0, 240, 255, 0.035) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+  background-size: 100% 3px, 4px 100%;
+  pointer-events: none;
+}
+
+/* Interactive Cursor Spotlight Card Effect */
+.spotlight-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 240, 255, 0.4),
+    rgba(0, 240, 255, 0.05) 40%,
+    transparent 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* Stepper Horizontal Scroll Fade Mask */
+.stepper-mask-fade {
+  mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+}
+
+/* Custom Cursor OS Hide Rule */
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor-active,
+  html.custom-cursor-active body,
+  html.custom-cursor-active a,
+  html.custom-cursor-active button,
+  html.custom-cursor-active [role="button"],
+  html.custom-cursor-active .spotlight-card {
+    cursor: none !important;
+  }
+  html.custom-cursor-active input,
+  html.custom-cursor-active textarea,
+  html.custom-cursor-active select {
+    cursor: auto !important;
+  }
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .radar-sweep-beam,
+  .sonar-target-blip,
+  .sonar-echo-ring {
+    animation: none !important;
+  }
+}
