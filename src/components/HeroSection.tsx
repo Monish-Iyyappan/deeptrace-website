@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { MissionMetric, LightboxImage } from '../types';
 import { attachMagneticEffect, isReducedMotion, scrollToTarget } from '../utils/motion';
+import { Skiper104 } from './ui/Skiper104';
+import { Skiper48, Skiper48Slide } from './ui/Skiper48';
 
 interface HeroSectionProps {
   metrics: MissionMetric[];
@@ -9,6 +11,45 @@ interface HeroSectionProps {
   onExploreClick: () => void;
   onImageClick?: (image: LightboxImage) => void;
 }
+
+const HERO_MISSION_SLIDES: Skiper48Slide[] = [
+  {
+    id: 'slide-01',
+    title: 'Raw Acoustic Bathymetry Acquisition',
+    category: 'INGESTION // HYDROPHONE',
+    imageUrl:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDZZ96TCHxhX1DmUe_tZFxP14WBBqxQL1WNzu_xGmYP_vPLnl2gyKh0JYkZulmu2D49-64_ZtJ5hLCsycxpvmE923C11i1ujf2G3ZKkUaKBlyje9fvyFU8ce8MK5f85xDEKEfilaoFufQVsRPqawIRYP2MBBl0Oq6xIJMr8zu62Yvlr6vFwuPJkzvnBtcBKi_bSLyCIST31y2U9zwOL7O3cb4rpGSLuKKee08K4IEaWUb_7VEa84q2w',
+    coordinates: "LAT: 36°48'N | LON: 122°01'W",
+    status: 'SYS // ACQUIRING'
+  },
+  {
+    id: 'slide-02',
+    title: 'Slant-Range Distortion Correction',
+    category: 'CONDITIONING // FROST FILTER',
+    imageUrl:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDmlJ1xkuL6RjsTP4S46aqK6OfIapA4SsyDcXW0xF8RCHxKNyw4hEtTawoFqJ_oNZIAw8zANUou_VOxvyzL4mwRn0aB9HTQ8XkhR_d42QdRz22-7hXO1UBs0sgF0geyo1pf5mtwr4Odu73duY6Tz5-VEZ5ZQOUQZXlnMa6zi5OukFA_5FLdP8IBDFg2D9HVZq2AuIURvjToIvzMW0ldGFgIwvv_438FqHLlHbxJ_w7kr7ffFvTImW2J',
+    coordinates: 'DEPTH: -420M | SWATH: 300M',
+    status: 'CALIBRATED'
+  },
+  {
+    id: 'slide-03',
+    title: 'AI Ghost Gear Neural Detection (YOLOv11)',
+    category: 'NEURAL INFERENCE // 98.4% mAP',
+    imageUrl:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAy4PqfP9TYUORx7eh4SJh3SXQx6xa4GcsNYBHS9nKoteMSL-ypKck2Lgn96ah3POOOpoop9Gaf4QCEDqXbsYpmjfLYfpFnVokgQJ6rwrLyam54aVPquxkXgZOuXqBeRbCcu0DxELnAISeS_QlFAXvDP4c4gY49YKK1PxbUDQfY8tiFRdp71mujwncCRGEjVxCCtA6xtSDspnuyccRKvyanjld6guyfZBT2iTmVHQSOwL7s-EQyEDEt',
+    coordinates: 'CONF: 0.984 | LATENCY: 14.1ms',
+    status: 'THREAT VERIFIED'
+  },
+  {
+    id: 'slide-04',
+    title: 'Bio-Entanglement Hazard Assessment',
+    category: 'TAXONOMY // BIO-ALERT',
+    imageUrl:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCvW0Zq986jx_3a-zt3wwnqhbV0SUXzDBuGtVq8sQMvWX7snCg4rj0tpffUn96EK1KXI8KC7lntR0CCPdNsJtjuYktZRp6y445GmSHA5dlpYIFa28wOnPsRgZ-06yztzBN_maVHgEDLL8x83AGJgqqo_UWLkEzyLdaMWXxUbyrocgS2tQWLVJjlmPP62_bEBJQuLTge-rQcdXK6KZU4pa3ph5Oa2J_pl6D5RtK5j2doPsQWArf9cxf9',
+    coordinates: 'MONTEREY SHELF // SECTOR 7',
+    status: 'CRITICAL QUEUE'
+  }
+];
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   metrics,
@@ -18,11 +59,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const heroContainerRef = useRef<HTMLDivElement>(null);
   const accessDemoBtnRef = useRef<HTMLButtonElement>(null);
-  const metricsContainerRef = useRef<HTMLDivElement>(null);
+  const radarButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Attach magnetic physics to the main CTA button
+    // Attach magnetic physics to CTA button and optical radar
     const cleanupMagnetic = attachMagneticEffect(accessDemoBtnRef.current, 0.25);
+    const cleanupRadarMagnetic = attachMagneticEffect(radarButtonRef.current, 0.15);
 
     // Coordinated staggered entrance for Hero elements if motion allowed
     if (!isReducedMotion() && heroContainerRef.current) {
@@ -39,6 +81,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           delay: 0.1
         }
       );
+
+      if (radarButtonRef.current) {
+        gsap.fromTo(
+          radarButtonRef.current,
+          { opacity: 0, scale: 0.82, rotation: -12 },
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 1,
+            ease: 'back.out(1.4)',
+            delay: 0.2
+          }
+        );
+      }
 
       const metricCards = heroContainerRef.current.querySelectorAll('.metric-gauge-card');
       gsap.fromTo(
@@ -58,6 +115,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
     return () => {
       cleanupMagnetic();
+      cleanupRadarMagnetic();
     };
   }, []);
 
@@ -93,8 +151,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Holographic Circular Sonar Radar (Clickable for Optical Preview) */}
         <button
+          ref={radarButtonRef}
           aria-label="Enlarge DeepTrace Circular Sonar Radar"
-          className="hero-anim-item relative flex items-center justify-center mb-space-xl group cursor-pointer focus:outline-none rounded-full"
+          className="hero-anim-item relative flex items-center justify-center mb-space-xl group cursor-pointer focus:outline-none rounded-full will-change-transform"
           title="Click to view optical preview"
           onClick={handleRadarClick}
         >
@@ -184,32 +243,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* Key Telemetry Gauges Grid */}
-        <div
-          ref={metricsContainerRef}
-          className="grid grid-cols-2 md:grid-cols-4 gap-space-md w-full max-w-4xl mb-space-2xl"
-        >
-          {metrics.map((metric, idx) => (
-            <div
-              key={idx}
-              className="metric-gauge-card p-space-md bg-surface-container-low/90 rounded-lg flex flex-col items-center justify-center shadow-sm border border-cyan-500/15 hover:border-cyan-400/40 hover:shadow-[0_0_16px_rgba(0,240,255,0.12)] transition-all"
-            >
-              <span className="font-label-sm text-label-sm text-on-surface-variant font-mono">
-                {metric.label}
-              </span>
-              <span
-                className={`font-headline-md text-headline-md font-orbitron my-1 ${
-                  metric.highlightColor || 'text-primary-container'
-                }`}
-              >
-                {metric.value}
-              </span>
-              <span className="font-label-sm text-label-sm text-secondary-fixed font-mono">
-                {metric.subValue}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* Key Telemetry Gauges Grid (Skiper104 Scroll Reveal Grid) */}
+        <Skiper104 metrics={metrics} />
+
+        {/* Tactical Mission Feed Carousel (Skiper48 Card Swipe) */}
+        <Skiper48 slides={HERO_MISSION_SLIDES} onSlideClick={onImageClick} />
 
         {/* Hero CTA Button -> Scrolls to Deployment Section */}
         <button

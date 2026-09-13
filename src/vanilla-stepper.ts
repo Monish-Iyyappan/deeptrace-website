@@ -307,14 +307,16 @@ export class DeepTraceHUDController {
       }
     };
 
-    // Restore from sessionStorage on load
+    // Reset on exit/load
     try {
-      const saved = sessionStorage.getItem(sessionKey);
-      if (saved) {
-        updateTeamBadges(saved);
-        if (memberSelect) memberSelect.value = saved;
-      }
+      sessionStorage.removeItem(sessionKey);
     } catch {}
+
+    window.addEventListener('beforeunload', () => {
+      try {
+        sessionStorage.removeItem(sessionKey);
+      } catch {}
+    });
 
     authTrigger?.addEventListener('click', () => {
       authModal?.classList.remove('hidden');

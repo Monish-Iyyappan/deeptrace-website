@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { PipelineStage, LightboxImage } from '../types';
-import { attachSpotlight, attachCardTilt, isReducedMotion, scrollToTarget } from '../utils/motion';
+import { attachSpotlight, isReducedMotion, scrollToTarget } from '../utils/motion';
+import { Skiper90Card } from './ui/Skiper90';
+import { Skiper71 } from './ui/Skiper71';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,23 +25,57 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
     const cardEl = cardRef.current;
     if (!cardEl) return;
 
-    // Attach interactive spotlight glow border and 3D card tilt to the entire step box (same as launch box)
-    const cleanupSpotlight = attachSpotlight(cardEl);
-    const cleanupTilt = attachCardTilt(cardEl, 4);
+    const stepNum = parseInt(stage.stepNumber, 10) || 1;
+    const stepAngles = [-1.8, 1.8, -1.5, 1.5, -1.8, 1.6, -1.4, 1.8, -1.6, 1.5, -1.5];
+    const initialRot = stepAngles[(stepNum - 1) % stepAngles.length];
 
-    // ScrollTrigger reveal animation
+    // Attach interactive spotlight glow border
+    const cleanupSpotlight = attachSpotlight(cardEl);
+
+    // Initial resting rotation
+    gsap.set(cardEl, { rotation: initialRot, transformOrigin: 'center center' });
+
+    // Hover listeners to align to 0deg and return to initialRot
+    const handleMouseEnter = () => {
+      gsap.to(cardEl, {
+        rotation: 0,
+        scale: 1.015,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(cardEl, {
+        rotation: initialRot,
+        scale: 1,
+        duration: 0.45,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    };
+
+    cardEl.addEventListener('mouseenter', handleMouseEnter);
+    cardEl.addEventListener('mouseleave', handleMouseLeave);
+
+    // GSAP ScrollTrigger reveal with Skiper17 rotational swing
     let trigger: ScrollTrigger | null = null;
-    if (!isReducedMotion() && !stage.featured) {
+    if (!isReducedMotion()) {
       const animation = gsap.fromTo(
         cardEl,
         {
           opacity: 0,
-          y: 35
+          y: 45,
+          rotation: initialRot * 2.2,
+          scale: 0.96
         },
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
+          rotation: initialRot,
+          scale: 1,
+          duration: 0.85,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: cardEl,
@@ -53,10 +89,11 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
 
     return () => {
       cleanupSpotlight();
-      cleanupTilt();
+      cardEl.removeEventListener('mouseenter', handleMouseEnter);
+      cardEl.removeEventListener('mouseleave', handleMouseLeave);
       if (trigger) trigger.kill();
     };
-  }, [stage.featured]);
+  }, [stage.featured, stage.stepNumber]);
 
   const handleMediaClick = (e: React.MouseEvent<HTMLElement>) => {
     if (onImageClick) {
@@ -85,7 +122,7 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
   /* FEATURED FULL-VIEWPORT STAGE TAKEOVER */
   if (stage.featured) {
     return (
-      <div
+      <Skiper90Card
         ref={cardRef}
         className="relative w-full min-h-[90vh] md:min-h-screen rounded-2xl md:rounded-3xl overflow-hidden border border-cyan-500/35 hover:border-cyan-400/60 shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] flex flex-col justify-between p-6 md:p-12 scroll-mt-24 my-8 spotlight-card backdrop-blur-md transition-[border-color,box-shadow] duration-300 will-change-transform"
         id={stage.id}
@@ -182,19 +219,16 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
               title="Click to view optical preview"
               onClick={handleMediaClick}
             >
-              <img
-                alt={stage.media.imageAlt}
-                className="w-full h-full object-cover opacity-90 group-hover:scale-105 group-hover:opacity-100 transition-all duration-300"
+              <Skiper71
                 src={stage.media.imageUrl}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#080f18]/90 via-transparent to-transparent pointer-events-none"></div>
-              <div className="absolute inset-0 hud-scanline-overlay pointer-events-none"></div>
-
-              {stage.media.tagBottomLeft && (
-                <div className="absolute bottom-3 left-3 font-label-sm text-[10px] font-mono text-primary-container bg-[#080f18]/90 border border-cyan-500/35 px-2 py-1 rounded shadow-sm">
-                  {stage.media.tagBottomLeft}
-                </div>
-              )}
+                alt={stage.media.imageAlt}
+              >
+                {stage.media.tagBottomLeft && (
+                  <div className="absolute bottom-3 left-3 font-label-sm text-[10px] font-mono text-primary-container bg-[#080f18]/90 border border-cyan-500/35 px-2 py-1 rounded shadow-sm z-10">
+                    {stage.media.tagBottomLeft}
+                  </div>
+                )}
+              </Skiper71>
             </button>
             <span className="text-[10px] font-mono text-on-surface-variant pt-2">
               [CLICK SPECTROGRAM FOR OPTICAL PREVIEW]
@@ -218,7 +252,7 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
             </span>
           </button>
         </div>
-      </div>
+      </Skiper90Card>
     );
   }
 
@@ -247,26 +281,22 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
           title="Click to view optical preview"
           onClick={handleMediaClick}
         >
-          <img
-            alt={stage.media.imageAlt}
-            className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
-            loading="lazy"
+          <Skiper71
             src={stage.media.imageUrl}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080f18]/90 via-transparent to-transparent pointer-events-none"></div>
-          <div className="absolute inset-0 hud-scanline-overlay pointer-events-none"></div>
+            alt={stage.media.imageAlt}
+          >
+            {stage.media.tagBottomLeft && (
+              <div className="absolute bottom-space-sm left-space-sm font-label-sm text-[10px] font-mono text-primary-container bg-[#080f18]/90 border border-cyan-500/35 px-space-xs py-space-2xs rounded shadow-sm z-10">
+                {stage.media.tagBottomLeft}
+              </div>
+            )}
 
-          {stage.media.tagBottomLeft && (
-            <div className="absolute bottom-space-sm left-space-sm font-label-sm text-[10px] font-mono text-primary-container bg-[#080f18]/90 border border-cyan-500/35 px-space-xs py-space-2xs rounded shadow-sm">
-              {stage.media.tagBottomLeft}
-            </div>
-          )}
-
-          {stage.media.tagBottomRight && (
-            <div className="absolute bottom-space-sm right-space-sm font-label-sm text-[10px] font-mono text-outline bg-[#080f18]/90 border border-cyan-500/35 px-space-xs py-space-2xs rounded shadow-sm">
-              {stage.media.tagBottomRight}
-            </div>
-          )}
+            {stage.media.tagBottomRight && (
+              <div className="absolute bottom-space-sm right-space-sm font-label-sm text-[10px] font-mono text-outline bg-[#080f18]/90 border border-cyan-500/35 px-space-xs py-space-2xs rounded shadow-sm z-10">
+                {stage.media.tagBottomRight}
+              </div>
+            )}
+          </Skiper71>
         </button>
 
         <div className="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant font-mono">
@@ -297,11 +327,11 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
           {stage.title}
         </h2>
 
-        <div className="space-y-space-xs">
+        <div className="space-y-space-xs p-4 bg-[#0d1724]/90 rounded-xl border border-cyan-500/20 shadow-inner">
           <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider">
             WHAT THIS DOES
           </h3>
-          <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
             {stage.whatThisDoes}
           </p>
           <div className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs pt-space-2xs font-mono">
@@ -312,11 +342,11 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
           </div>
         </div>
 
-        <div className="space-y-space-xs">
+        <div className="space-y-space-xs p-4 bg-[#0d1724]/90 rounded-xl border border-cyan-500/20 shadow-inner">
           <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider">
             WHAT WE'VE DONE
           </h3>
-          <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
             {stage.whatWeveDone}
             <br />
             <strong className="text-secondary-fixed font-mono">Stack:</strong>{' '}
@@ -340,7 +370,7 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
     );
 
     return (
-      <div
+      <Skiper90Card
         ref={cardRef}
         className="relative rounded-2xl bg-surface-container-high/90 md:bg-[#091420]/90 backdrop-blur-md border border-cyan-500/35 hover:border-cyan-400/60 p-space-xl md:p-space-2xl shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-[border-color,box-shadow] duration-300 overflow-hidden spotlight-card scroll-mt-36 will-change-transform"
         id={stage.id}
@@ -361,13 +391,13 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
             </>
           )}
         </div>
-      </div>
+      </Skiper90Card>
     );
   }
 
-  /* Center Layout (Dual Flanking Text Cards, Centered Large Image inside unified Launch-Box-style Step Card) */
+  /* Center Layout (What We've Done on Left, Image in Center, What This Does on Right) */
   return (
-    <div
+    <Skiper90Card
       ref={cardRef}
       className="relative rounded-2xl bg-surface-container-high/90 md:bg-[#091420]/90 backdrop-blur-md border border-cyan-500/35 hover:border-cyan-400/60 p-space-xl md:p-space-2xl shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] transition-[border-color,box-shadow] duration-300 flex flex-col gap-space-lg scroll-mt-36 spotlight-card overflow-hidden will-change-transform"
       id={stage.id}
@@ -376,6 +406,7 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
       <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="relative z-10 flex flex-col gap-space-lg">
+        {/* Top Header Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
           <div className="flex items-center gap-space-sm font-label-sm text-label-sm">
             <span className="px-space-sm py-space-2xs rounded bg-surface-container-high text-primary-fixed-dim border border-cyan-500/20 font-mono">
@@ -388,73 +419,82 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
           </span>
         </div>
 
+        {/* Step Title */}
         <h2 className="font-headline-lg text-headline-lg text-primary uppercase tracking-wide font-orbitron">
           {stage.title}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-space-xl">
-          <div className="space-y-space-xs p-space-md bg-[#0d1724]/90 rounded-lg border border-cyan-500/20 shadow-inner">
-            <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider">
-              WHAT THIS DOES
-            </h3>
-            <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
-              {stage.whatThisDoes}
-            </p>
-            <div className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs pt-space-2xs font-mono">
+        {/* 3-Column Triptych Grid: [What We've Done on Left] - [Image in Center] - [What This Does on Right] */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+          {/* Left Column: WHAT WE'VE DONE */}
+          <div className="space-y-space-xs p-5 bg-[#0d1724]/90 rounded-xl border border-cyan-500/20 shadow-inner flex flex-col justify-between order-1">
+            <div>
+              <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider mb-2">
+                WHAT WE'VE DONE
+              </h3>
+              <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
+                {stage.whatWeveDone}
+              </p>
+            </div>
+            <div className="pt-3 mt-3 border-t border-cyan-500/15 font-mono text-xs text-secondary-fixed">
+              <strong>Stack:</strong>{' '}
+              <span className="font-mono text-cyan-200">{stage.stack}</span>
+            </div>
+          </div>
+
+          {/* Center Column: IMAGE IN THE MIDDLE */}
+          <div className="flex flex-col justify-center order-2">
+            <button
+              aria-label={`Enlarge image for ${stage.title}`}
+              className="relative w-full h-72 lg:h-full min-h-[260px] rounded-xl bg-[#060c14] border border-cyan-500/20 overflow-hidden shadow-inner group cursor-pointer focus:outline-none flex items-center justify-center"
+              title="Click to view optical preview"
+              onClick={handleMediaClick}
+            >
+              <Skiper71
+                src={stage.media.imageUrl}
+                alt={stage.media.imageAlt}
+              >
+                {stage.media.tagTopRight && (
+                  <div className="absolute top-space-sm right-space-sm font-label-sm text-label-sm text-on-primary-fixed bg-primary-container px-space-sm py-space-2xs rounded font-bold shadow-md font-mono z-10 text-[10px]">
+                    {stage.media.tagTopRight}
+                  </div>
+                )}
+
+                {stage.media.tagBottomRight && (
+                  <div className="absolute bottom-space-sm right-space-sm font-label-sm text-label-sm text-primary bg-[#080f18]/90 border border-cyan-500/30 px-space-sm py-space-xs rounded shadow-md font-mono text-[10px] z-10">
+                    {stage.media.tagBottomRight}
+                  </div>
+                )}
+
+                {stage.media.tagBottomLeft && (
+                  <div className="absolute bottom-space-sm left-space-sm font-label-sm text-label-sm text-primary bg-[#080f18]/90 border border-cyan-500/30 px-space-sm py-space-2xs rounded font-mono text-[10px] z-10">
+                    {stage.media.tagBottomLeft}
+                  </div>
+                )}
+              </Skiper71>
+            </button>
+          </div>
+
+          {/* Right Column: WHAT THIS DOES */}
+          <div className="space-y-space-xs p-5 bg-[#0d1724]/90 rounded-xl border border-cyan-500/20 shadow-inner flex flex-col justify-between order-3">
+            <div>
+              <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider mb-2">
+                WHAT THIS DOES
+              </h3>
+              <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
+                {stage.whatThisDoes}
+              </p>
+            </div>
+            <div className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs pt-3 mt-3 border-t border-cyan-500/15 font-mono">
               <span
                 className={`w-1.5 h-1.5 rounded-full inline-block ${getStatusDotColor()}`}
               ></span>
               <span>STATUS: QUEUED FOR RELEASE</span>
             </div>
           </div>
-
-          <div className="space-y-space-xs p-space-md bg-[#0d1724]/90 rounded-lg border border-cyan-500/20 shadow-inner">
-            <h3 className="font-label-md text-label-md text-secondary-fixed uppercase font-mono tracking-wider">
-              WHAT WE'VE DONE
-            </h3>
-            <p className="font-body-md text-body-md text-slate-300 leading-relaxed">
-              {stage.whatWeveDone}
-              <br />
-              <strong className="text-secondary-fixed font-mono">Stack:</strong>{' '}
-              <span className="font-mono text-cyan-200">{stage.stack}</span>
-            </p>
-          </div>
         </div>
 
-        <button
-          aria-label={`Enlarge image for ${stage.title}`}
-          className="relative w-full h-80 rounded-lg bg-[#060c14] border border-cyan-500/15 overflow-hidden shadow-inner group cursor-pointer focus:outline-none"
-          title="Click to view optical preview"
-          onClick={handleMediaClick}
-        >
-          <img
-            alt={stage.media.imageAlt}
-            className="w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
-            loading="lazy"
-            src={stage.media.imageUrl}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080f18]/90 via-transparent to-transparent pointer-events-none"></div>
-          <div className="absolute inset-0 hud-scanline-overlay pointer-events-none"></div>
-
-          {stage.media.tagTopRight && (
-            <div className="absolute top-space-sm right-space-sm font-label-sm text-label-sm text-on-primary-fixed bg-primary-container px-space-sm py-space-2xs rounded font-bold shadow-md font-mono">
-              {stage.media.tagTopRight}
-            </div>
-          )}
-
-          {stage.media.tagBottomRight && (
-            <div className="absolute bottom-space-sm right-space-sm font-label-sm text-label-sm text-primary bg-[#080f18]/90 border border-cyan-500/30 px-space-sm py-space-xs rounded shadow-md font-mono text-[10px]">
-              {stage.media.tagBottomRight}
-            </div>
-          )}
-
-          {stage.media.tagBottomLeft && (
-            <div className="absolute bottom-space-sm left-space-sm font-label-sm text-label-sm text-primary bg-[#080f18]/90 border border-cyan-500/30 px-space-sm py-space-2xs rounded font-mono text-[10px]">
-              {stage.media.tagBottomLeft}
-            </div>
-          )}
-        </button>
-
+        {/* Bottom Stats Badges */}
         <div className="flex flex-wrap items-center justify-between gap-space-sm font-label-sm text-label-sm pt-1">
           {stage.stats.map((stat, idx) => (
             <span
@@ -470,6 +510,6 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
           ))}
         </div>
       </div>
-    </div>
+    </Skiper90Card>
   );
 };

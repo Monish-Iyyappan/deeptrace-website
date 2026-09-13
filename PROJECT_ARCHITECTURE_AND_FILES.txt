@@ -1,0 +1,394 @@
+================================================================================
+DEEPTRACE // TACTICAL NEURAL SONAR ARCHITECTURE & FILE DIRECTORY GUIDE
+================================================================================
+Project: DeepTrace Neural Sonar Web Application
+Platform: React 18 + TypeScript + Vite + Tailwind CSS + GSAP + Framer Motion
+Author: DeepTrace Architecture Team
+Deployment Target: Vercel
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS:
+--------------------------------------------------------------------------------
+1. EXECUTIVE OVERVIEW & ARCHITECTURE
+2. PROJECT DIRECTORY ARCHITECTURE (TREE STRUCTURE)
+3. APPLICATION & TECHNICAL ARCHITECTURE
+4. COMPLETE FILE-BY-FILE BREAKDOWN
+5. UNWANTED / REDUNDANT FILES CLEANUP SUMMARY
+6. BUILD, RUN & DEPLOYMENT GUIDE
+
+================================================================================
+1. EXECUTIVE OVERVIEW & ARCHITECTURE
+================================================================================
+DeepTrace is an open-access, high-performance tactical web platform designed for
+autonomous sub-surface acoustic reconnaissance, ghost gear detection (YOLOv11x),
+bathymetric cartography, and marine habitat conservation.
+
+The system is built as a 2-Page Responsive Web Application:
+- Page 1: Standalone Home & Authentication Gateway (Sonar Logo on Center-Left &
+  Tactical Login / Guest Portal on Center-Right with dynamic Roll Text effects).
+- Page 2: Tactical Command Dashboard featuring the 11-step neural acoustic
+  pipeline, Hero Telemetry Gauges, Sticky Stepper, Fixed Vertical Nav Rail,
+  Full-Journey Skiper19 Sonar Scout Fish, Launch CTA, and the 6-crew Dossier Team
+  section with organic tilt and hover alignment.
+
+================================================================================
+2. PROJECT DIRECTORY ARCHITECTURE (TREE STRUCTURE)
+================================================================================
+
+deeptrace-website/
+│
+├── .git/                                 # Git version control metadata
+├── dist/                                 # Production build output (Vite)
+│   ├── assets/                           # Bundled JS, CSS, and asset chunks
+│   └── index.html                        # Minified production entry point
+├── node_modules/                         # NPM dependencies and type packages
+│
+├── index.html                            # Root HTML template with HUD styling & fonts
+├── package.json                          # Project dependencies, scripts, metadata
+├── package-lock.json                     # Locked dependency tree
+├── tsconfig.json                         # TypeScript compiler configuration
+├── vite.config.ts                        # Vite bundler & React plugin config
+├── vercel.json                           # Vercel deployment & routing config
+├── README.md                             # Project overview and instructions
+├── PROJECT_ARCHITECTURE_AND_FILES.txt   # This comprehensive architectural guide
+│
+└── src/                                  # Application source code
+    ├── main.tsx                          # React application root entry point
+    ├── index.css                         # Global tactical styles, animations, HUD scanlines
+    ├── vanilla-stepper.ts                # Vanilla TS lifecycle controller & session cleanup
+    │
+    ├── types/                            # TypeScript type definitions
+    │   └── index.ts                      # Interfaces for stages, team, metrics, images
+    │
+    ├── lib/                              # Utility libraries
+    │   └── utils.ts                      # Tailwind merge & clsx class helper (cn)
+    │
+    ├── data/                             # Static datasets & mission content
+    │   └── pipelineData.ts               # 11 pipeline stages, 6 crew credentials, metrics
+    │
+    ├── utils/                            # Animation, motion & kinetic engines
+    │   └── motion.ts                     # Lenis scroll, GSAP ScrollTrigger, spotlight & magnetic
+    │
+    └── components/                       # UI Component Library
+        ├── App.tsx                       # Root router & page orchestrator (Page 1 vs 2)
+        ├── Header.tsx                    # Fixed top HUD navigation bar with return-to-home
+        ├── HomeAuthSection.tsx           # Page 1 Home Gateway: Logo + Login Box + Roll Text
+        ├── HeroSection.tsx               # Page 2 Hero: Diagnostics, Radar, Metrics, Slides
+        ├── PipelineStageCard.tsx         # 11-Stage Card renderer (center & left/right layouts)
+        ├── StickyStepper.tsx             # Sticky horizontal step rail with progress beam
+        ├── VerticalNavRail.tsx           # Fixed right-side vertical step navigation dots
+        ├── TeamSection.tsx               # 6 Crew dossier cards with organic tilt layout
+        ├── Footer.tsx                    # Tactical bottom footer & telemetry status
+        ├── CustomCursor.tsx              # Neon cyan crosshair cursor with radar ring
+        ├── ImagePopup.tsx                # Floating optical image zoom lightbox
+        │
+        └── ui/                           # Specialized Motion & Micro-Interaction Primitives
+            ├── TextRoll.tsx              # 3D Character roll & dynamic vertical word slot
+            ├── Skiper17.tsx              # Organic fanned dossier card with 0° hover alignment
+            ├── Skiper19.tsx              # Full-journey cybernetic sonar scout fish
+            ├── Skiper48.tsx              # Tactical mission feed preview swipe carousel
+            ├── Skiper58.tsx              # Kinetic rolling text button / nav item
+            ├── Skiper71.tsx              # Center-layout 3-column stage layout grid
+            ├── Skiper84.tsx              # Ambient background particle grid
+            ├── Skiper90.tsx              # Tactical CTA button with laser border
+            └── Skiper104.tsx             # Telemetry gauge grid scroll-reveal
+
+================================================================================
+3. APPLICATION & TECHNICAL ARCHITECTURE
+================================================================================
+
+A. TWO-PAGE GATEWAY ARCHITECTURE:
+---------------------------------
+The application uses a state-driven 2-page flow governed by `hasEntered`:
+1. `hasEntered = false` (Page 1 - Home Gateway):
+   - Renders `HomeAuthSection.tsx`.
+   - Center-Left: DeepTrace 360° holographic radar emblem with scan beam.
+   - Center-Right: Tactical Login Box with password toggle and error validation.
+   - Dynamic Roll Text: "DEEPTRACE" letter-by-letter 3D roll and cycling mission
+     word pill ("GHOST GEAR DETECTION", "MARINE CONSERVATION", etc.).
+   - Login Credentials: Crew members authenticate with their exact credentials
+     (e.g., username "monish iyyappan", password "monish@iyyappan"), which sets
+     `signedInMemberId` and flags that teammate as ACTIVE.
+   - Guest Access: Non-teammates can click "ENTER WITHOUT CREDENTIALS (NON-TEAMMATES)"
+     to explore the application with full read access.
+
+2. `hasEntered = true` (Page 2 - Tactical Platform):
+   - Renders Header, Stepper, Vertical Rail, Hero, 11 Pipeline Stages,
+     Launch Box CTA, Team Dossier Section, and Footer.
+   - Clicking the Top-Left Header Logo returns the user to Page 1.
+
+B. SESSION & ACTIVE/UNACTIVE LIFECYCLE:
+--------------------------------------
+- All team members initialize as UNACTIVE by default.
+- Only the currently signed-in teammate displays the glowing cyan "ACTIVE" badge.
+- When the user exits the browser or reloads the tab, a `beforeunload` listener
+  automatically purges the session, resetting all members to "UNACTIVE".
+
+C. MOTION & ANIMATION ENGINE (Lenis + GSAP + Framer Motion):
+------------------------------------------------------------
+- Smooth Kinetic Scroll: Powered by Lenis, synchronized with GSAP ticker.
+- Cursor Spotlight: Hardware-accelerated CSS custom property (`--mouse-x`, `--mouse-y`)
+  producing a radial glow border following the cursor on all cards.
+- Magnetic Physics: Buttons gently pull toward the cursor using elastic GSAP tweens.
+- Skiper17 Rotational GSAP Sequence:
+  Each section enters with a dynamic GSAP ScrollTrigger rotation and aligns straight
+  to 0° on hover:
+  * Logo & Header: Entrance rotation from -18° to 0°.
+  * Optical Radar: Entrance rotation from -12° to 0° with magnetic tilt.
+  * Image Preview (Skiper48): Subtle resting tilt (-1.5°) straightening to 0° on hover.
+  * Step Cards (01 to 11): Alternating resting tilt angles ([-1.8°, 1.8°, -1.5°, 1.5°...])
+    with GSAP ScrollTrigger entrance, snapping to 0° on hover.
+  * Launch Box CTA: Enters with rotation -4.5° -> -1.5°, straightening to 0° on hover.
+  * Teammates Section: Alternating dossier resting angles ([-4.5°, 3.5°, -3.5°, 3.5°, -2.5°, 3.5°]),
+    smoothly snapping to 0° on hover with spring return.
+
+D. SKIPER19 FULL-JOURNEY CYBERNETIC SONAR SCOUT FISH:
+-----------------------------------------------------
+- Full-page swimming scout drone that originates at the DeepTrace logo at the top
+  and swims smoothly down the left track alongside content to the end of the page.
+- Animated SVG body with flapping pectoral fins, oscillating tail fin with glowing
+  core, pulsating optic visor, sonar ping waves, and trailing bubble wake.
+- Real-time HUD readout calculating dynamic sub-sea depth (-0040M to -4200M) and
+  active milestone tracking (GATEWAY -> RADAR -> NEURAL -> MAPPING -> LAUNCH -> TEAM).
+
+================================================================================
+4. COMPLETE FILE-BY-FILE BREAKDOWN
+================================================================================
+
+--- [ROOT CONFIGURATION FILES] ---
+
+1. `index.html`:
+   The root HTML document. Contains the tactical viewport settings, Orbitron /
+   Space Mono / Oxanium font links, Google Material Symbols icon sheets, CRT
+   scanline overlays, and the root `<div id="root"></div>` mounting point.
+
+2. `package.json`:
+   Node.js package manifest. Declares dependencies including `react`, `react-dom`,
+   `gsap`, `framer-motion`, `lenis`, `lucide-react`, `tailwind-merge`, and
+   devDependencies (`vite`, `@vitejs/plugin-react`, `typescript`).
+
+3. `tsconfig.json`:
+   TypeScript compiler configuration enabling strict mode, JSX React-JSX transform,
+   ESNext module resolution, and module bundling.
+
+4. `vite.config.ts`:
+   Vite build and dev-server configuration with `@vitejs/plugin-react` plugin.
+
+5. `vercel.json`:
+   Production deployment configuration for Vercel. Includes SPA client-side route
+   rewrites (`/(.*) -> /index.html`), 1-year immutable caching for `/assets/*`, and
+   security headers (X-Frame-Options, X-Content-Type-Options, X-XSS-Protection).
+
+6. `README.md`:
+   Repository markdown documentation with project description, cloning instructions,
+   scripts, and pipeline overview.
+
+7. `PROJECT_ARCHITECTURE_AND_FILES.txt`:
+   This master architectural document and file guide.
+
+--- [SRC ROOT FILES] ---
+
+8. `src/main.tsx`:
+   Application bootstrapping file. Renders `<App />` into the DOM `root` element
+   inside React `StrictMode`.
+
+9. `src/index.css`:
+   Global CSS styling file. Configures custom dark theme variables, tactical
+   scrollbars, Orbitron/Oxanium font rules, CRT scanline overlay, spotlight card
+   borders, and keyframe animations (`fish-tail-swim`, `fish-fin-flutter`,
+   `fish-sonar-ping`, `radar-sweep`, `sonar-blip`).
+
+10. `src/vanilla-stepper.ts`:
+    TypeScript helper module managing session lifecycle and beforeunload event
+    listeners ensuring credentials reset to UNACTIVE upon browser reload/exit.
+
+--- [DATA, TYPES, UTILS & LIB] ---
+
+11. `src/types/index.ts`:
+    Core TypeScript type interfaces:
+    - `PipelineStage`: Step ID, number, title, category, media, metrics, descriptions.
+    - `TeamMember`: ID, name, role, callsign, clearance, username, password.
+    - `MissionMetric`: Telemetry key, value, label, trend.
+    - `LightboxImage`: Image URL, alt text, caption, bounding rectangle.
+
+12. `src/data/pipelineData.ts`:
+    Master data store containing:
+    - `PIPELINE_STAGES`: 11 stages covering Raw Hydrophone Ingestion, Slant-Range
+      Correction, Adaptive Beamforming, YOLOv11x Ghost Gear Detection, Bathymetric
+      Mapping, Bio-Entanglement Risk Assessment, and Fleet Georeferencing.
+    - `TEAM_MEMBERS`: 6 crew member profiles and credentials:
+      1. MONISH IYYAPPAN (monish iyyappan / monish@iyyappan)
+      2. SAI JAIWANT (sai jaiwant / sai@jaiwant)
+      3. MONISHA MURUGAN (monisha murugan / monisha@murugan)
+      4. MONISHA SATHISH (monisha sathish / monisha@sathish)
+      5. MANISHA V (manisha v / manisha@v)
+      6. MONISHA VENKATESAN (monisha venkatesan / monisha@venkatesan)
+    - `MISSION_METRICS`: Real-time system telemetry benchmark specifications.
+
+13. `src/lib/utils.ts`:
+    Helper function `cn()` combining `clsx` and `tailwind-merge` for clean,
+    conflict-free dynamic Tailwind class strings.
+
+14. `src/utils/motion.ts`:
+    Motion and physics engine utilities:
+    - `initSmoothScroll()`: Initializes Lenis kinetic scroll tied to GSAP ticker.
+    - `scrollToTarget()`: Smoothly scrolls to target element/ID with Lenis offset.
+    - `attachMagneticEffect()`: Attaches elastic magnetic cursor attraction.
+    - `attachSpotlight()`: Computes mouse coordinates for radial neon border glow.
+    - `attachCardTilt()`: 3D cursor-following tilt effect.
+    - `isReducedMotion()`: Checks system accessibility preferences.
+
+--- [PAGE COMPONENTS] ---
+
+15. `src/components/App.tsx`:
+    Root router component orchestrating:
+    - State: `hasEntered` (Page 1 vs 2), `activeStepIndex`, `signedInMemberId`, `lightboxImage`.
+    - Page 1: Standalone Home Gateway (`HomeAuthSection`).
+    - Page 2: Full platform with Header, Stepper, Vertical Nav Rail, Hero, 11 Stage Cards,
+      Launch Box CTA, Team Dossier Section, Footer, and Lightbox Popup.
+
+16. `src/components/HomeAuthSection.tsx`:
+    Page 1 Home Gateway Component:
+    - Center-Left: DeepTrace 360° radar emblem, 3D character roll "DEEPTRACE", and
+      rotating mission word roll pill.
+    - Center-Right: Minimal tactical Login Box with username/password inputs,
+      active session indicators, and guest bypass button.
+
+17. `src/components/Header.tsx`:
+    Fixed top tactical navigation bar:
+    - Brand logo with GSAP entrance rotation (-18° -> 0°) and return-to-home action.
+    - Active callsign badge for authenticated crew member.
+    - High-contrast centered navigation links (`TACTICAL OVERVIEW`, `SONAR TELEMETRY`, etc.).
+    - Magnetic `LAUNCH DEMO` action button.
+
+18. `src/components/HeroSection.tsx`:
+    Hero section containing:
+    - System diagnostics readout banner.
+    - Clickable circular holographic sonar radar with 360° sweep beam and entrance rotation.
+    - `Skiper104` Telemetry Gauges grid.
+    - `Skiper48` Tactical Mission Feed swipe carousel.
+    - Magnetic `ACCESS MISSION DEMO` button scrolling to Deployment CTA.
+
+19. `src/components/PipelineStageCard.tsx`:
+    Card component rendering each of the 11 pipeline stages:
+    - Center-image layout stages (Steps 02, 05, 08, 11): 3-column grid with
+      "WHAT WE'VE DONE" (left), "SONAR IMAGE" (middle), "WHAT THIS DOES" (right).
+    - Left/Right alternating layout stages (Steps 01, 03, 04, 06, 07, 09, 10).
+    - Alternating Skiper17 resting tilt angles and GSAP ScrollTrigger entrance.
+    - Hover alignment straight to 0° with spotlight border glow.
+
+20. `src/components/StickyStepper.tsx`:
+    Sticky horizontal navigation bar below the header:
+    - Dynamic cyan progress fill bar tracking scroll progress across 11 stages.
+    - Clickable step number nodes with `Skiper58` rolling text category labels.
+    - Edge fade masks (`.stepper-mask-fade`) for smooth horizontal scrolling on mobile.
+
+21. `src/components/VerticalNavRail.tsx`:
+    Fixed right-side vertical HUD navigation rail:
+    - Step markers 01 to 11 and Team badge.
+    - Active step highlighting and smooth scroll-to-target anchors.
+
+22. `src/components/TeamSection.tsx`:
+    Architecture Team section:
+    - 6 Crew Member dossier cards displayed in a responsive 3-column grid.
+    - Displays only crew member name in bold Orbitron typography and ACTIVE / UNACTIVE
+      status pill badge.
+    - GSAP ScrollTrigger rotational entrance and interactive click-to-authenticate.
+
+23. `src/components/Footer.tsx`:
+    Tactical footer with mission telemetry, open-source citations (NOAA / GGGI),
+    quick links, and copyright notices.
+
+24. `src/components/CustomCursor.tsx`:
+    Hardware-accelerated custom tactical HUD crosshair cursor:
+    - Center dot with rotating outer radar ring.
+    - Expanding pulse ring on hover over interactive links, buttons, and cards.
+
+25. `src/components/ImagePopup.tsx`:
+    Full-resolution image lightbox modal:
+    - Zooms in from the clicked element's bounding rect with spring animation.
+    - Displays high-resolution side-scan imagery with telemetry overlay, caption,
+      and Esc key listener.
+
+--- [UI MOTION & INTERACTION PRIMITIVES] ---
+
+26. `src/components/ui/TextRoll.tsx`:
+    - `TextRoll`: Splits strings into individual characters, each rolling vertically
+      with staggered timing on hover, mount, or periodic intervals.
+    - `WordRoll`: Rotating vertical slot machine badge cycling through tactical phrases.
+
+27. `src/components/ui/Skiper17.tsx`:
+    Dossier card primitive configured with alternating organic resting angles
+    ([-4.5°, 3.5°, -3.5°, 3.5°, -2.5°, 3.5°]). Smoothly snaps to 0° on hover with
+    spring physics (`stiffness: 400, damping: 24`) and returns on mouse leave.
+
+28. `src/components/ui/Skiper19.tsx`:
+    Full-journey cybernetic sonar scout fish:
+    - Originates at the logo and travels along the left track to the page bottom.
+    - Animated bio-drone with flapping fins, wagging tail, sonar ping rings,
+      hydrodynamic pitch angle, and real-time depth calculation.
+
+29. `src/components/ui/Skiper48.tsx`:
+    Tactical mission feed swipe carousel with resting -1.5° tilt, smooth 0° hover
+    alignment, slide navigation, and click-to-enlarge support.
+
+30. `src/components/ui/Skiper58.tsx`:
+    Kinetic rolling text button primitive rolling text upwards and revealing a glowing
+    cyan clone from below on hover.
+
+31. `src/components/ui/Skiper71.tsx`:
+    Responsive 3-column card layout helper for center-image pipeline stages.
+
+32. `src/components/ui/Skiper84.tsx`:
+    Ambient background grid and radial cyan lighting canvas.
+
+33. `src/components/ui/Skiper90.tsx`:
+    High-contrast tactical button with laser border and magnetic hover response.
+
+34. `src/components/ui/Skiper104.tsx`:
+    Telemetry metric gauge grid with staggered scroll-triggered entrance.
+
+================================================================================
+5. UNWANTED / REDUNDANT FILES CLEANUP SUMMARY
+================================================================================
+During our audit, the following obsolete/unused prototype files were safely deleted:
+- `src/components/Lightbox.tsx`: Superseded by the modernized `ImagePopup.tsx`.
+- `src/components/MemberSignInModal.tsx`: Superseded by the dedicated Page 1 Home
+  Gateway (`HomeAuthSection.tsx`).
+- `src/components/ui/Skiper6.tsx`: Prototype tooltip badge superseded by `Skiper17.tsx`.
+- `src/components/ui/Skiper56.tsx`: Canvas particle devouring input prototype not
+  used in production.
+
+All active components were verified with zero broken imports and a clean 0-error build.
+
+================================================================================
+6. BUILD, RUN & DEPLOYMENT GUIDE
+================================================================================
+
+A. LOCAL DEVELOPMENT:
+   Run the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:5173` in your browser.
+
+B. PRODUCTION BUILD:
+   Compile TypeScript and build optimized assets:
+   ```bash
+   npm run build
+   ```
+   Output is generated in the `dist/` directory.
+
+C. PREVIEW PRODUCTION BUILD:
+   ```bash
+   npm run preview
+   ```
+
+D. DEPLOYING TO VERCEL:
+   Method 1 (Git): Push your repository to GitHub; import into Vercel.
+   Method 2 (CLI): Run `npx vercel` in the project root.
+   Vercel reads `vercel.json` and automatically sets up SPA rewrites and caching.
+
+================================================================================
+END OF ARCHITECTURE GUIDE
+================================================================================

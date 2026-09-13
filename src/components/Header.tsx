@@ -1,23 +1,46 @@
 import React, { useEffect, useRef } from 'react';
-import { attachMagneticEffect, scrollToTarget } from '../utils/motion';
+import gsap from 'gsap';
+import { attachMagneticEffect, isReducedMotion, scrollToTarget } from '../utils/motion';
 import { TeamMember } from '../types';
 
 interface HeaderProps {
   onNavClick?: (targetId: string) => void;
-  onOpenSignInModal: () => void;
+  onOpenSignInModal?: () => void;
+  onReturnHome?: () => void;
   signedInMember?: TeamMember | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onNavClick,
-  onOpenSignInModal,
+  onReturnHome,
   signedInMember
 }) => {
   const launchBtnRef = useRef<HTMLAnchorElement>(null);
+  const logoEmblemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const cleanup = attachMagneticEffect(launchBtnRef.current, 0.2);
-    return () => cleanup();
+    const cleanupLaunchMagnetic = attachMagneticEffect(launchBtnRef.current, 0.2);
+    const cleanupLogoMagnetic = attachMagneticEffect(logoEmblemRef.current, 0.15);
+
+    if (!isReducedMotion() && logoEmblemRef.current) {
+      gsap.fromTo(
+        logoEmblemRef.current,
+        { opacity: 0, scale: 0.8, rotation: -18 },
+        {
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 0.8,
+          ease: 'back.out(1.5)',
+          delay: 0.1
+        }
+      );
+    }
+
+    return () => {
+      cleanupLaunchMagnetic();
+      cleanupLogoMagnetic();
+    };
   }, []);
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -29,19 +52,32 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (onReturnHome) {
+      onReturnHome();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_12px_rgba(0,0,0,0.4)] border-b border-cyan-500/15">
       <div className="h-20 w-full px-margin-desktop flex items-center justify-between relative">
         
-        {/* Left Brand & Interactive Crew Sign-In Trigger */}
+        {/* Left Brand Logo */}
         <div className="flex items-center gap-space-lg">
-          <button
-            aria-label="Open DeepTrace Crew Authentication Terminal"
-            className="flex items-center gap-space-md group cursor-pointer text-left bg-transparent border-0 p-0 focus:outline-none focus:ring-1 focus:ring-cyan-400 rounded-lg"
-            title="Click to sign in as DeepTrace Crew Member"
-            onClick={onOpenSignInModal}
+          <a
+            aria-label="DeepTrace Tactical Sonar Home"
+            className="flex items-center gap-space-md group cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-cyan-400 rounded-lg"
+            href="#home"
+            onClick={handleLogoClick}
+            title="Click to return to Home Gateway"
           >
-            <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center border border-cyan-500/30 group-hover:border-cyan-400 group-hover:shadow-[0_0_16px_rgba(0,240,255,0.4)] transition-all">
+            <div
+              ref={logoEmblemRef}
+              className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center border border-cyan-500/30 group-hover:border-cyan-400 group-hover:shadow-[0_0_16px_rgba(0,240,255,0.4)] transition-all will-change-transform"
+            >
               <span className="material-symbols-outlined text-primary-container text-xl group-hover:scale-110 transition-transform">
                 radar
               </span>
@@ -61,24 +97,21 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                 )}
               </div>
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-[9px] flex items-center gap-1">
-                <span>TACTICAL SUB-SURFACE SONAR</span>
-                <span className="text-primary-container opacity-0 group-hover:opacity-100 transition-opacity">
-                  [AUTH]
-                </span>
+              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-[9px]">
+                TACTICAL SUB-SURFACE SONAR
               </span>
             </div>
-          </button>
+          </a>
         </div>
 
-        {/* Centered Navigation Bar */}
+        {/* Centered Navigation Bar - Crisp, High-Contrast Legible Links */}
         <nav
           aria-label="Primary Navigation"
           className="hidden md:flex items-center gap-space-md absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         >
           <a
             aria-current="page"
-            className="px-space-md py-space-xs rounded transition-colors bg-surface-container-high text-primary font-bold border border-cyan-500/30 shadow-[0_0_10px_rgba(0,240,255,0.15)]"
+            className="px-space-md py-space-xs rounded font-mono text-xs font-bold transition-all bg-surface-container-high text-primary-container border border-cyan-500/40 shadow-[0_0_12px_rgba(0,240,255,0.25)]"
             href="#"
             onClick={(e) => {
               e.preventDefault();
@@ -88,28 +121,28 @@ export const Header: React.FC<HeaderProps> = ({
             TACTICAL OVERVIEW
           </a>
           <a
-            className="px-space-md py-space-xs rounded font-label-lg text-label-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all"
+            className="px-space-md py-space-xs rounded font-mono text-xs text-on-surface-variant hover:text-cyan-300 hover:bg-surface-container-low transition-all"
             href="#step-01"
             onClick={(e) => handleScroll(e, 'step-01')}
           >
             SONAR TELEMETRY
           </a>
           <a
-            className="px-space-md py-space-xs rounded font-label-lg text-label-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all"
+            className="px-space-md py-space-xs rounded font-mono text-xs text-on-surface-variant hover:text-cyan-300 hover:bg-surface-container-low transition-all"
             href="#step-08"
             onClick={(e) => handleScroll(e, 'step-08')}
           >
             BATHYMETRIC CARTOGRAPHY
           </a>
           <a
-            className="px-space-md py-space-xs rounded font-label-lg text-label-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all"
+            className="px-space-md py-space-xs rounded font-mono text-xs text-on-surface-variant hover:text-cyan-300 hover:bg-surface-container-low transition-all"
             href="#step-04"
             onClick={(e) => handleScroll(e, 'step-04')}
           >
             THREAT MATRIX
           </a>
           <a
-            className="px-space-md py-space-xs rounded font-label-lg text-label-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-all"
+            className="px-space-md py-space-xs rounded font-mono text-xs text-on-surface-variant hover:text-cyan-300 hover:bg-surface-container-low transition-all"
             href="#team-credits"
             onClick={(e) => handleScroll(e, 'team-credits')}
           >
@@ -123,6 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse shadow-[0_0_8px_rgba(0,240,255,0.8)]"></span>
             <span className="text-on-surface-variant font-mono">ACTIVE PING 0.4s</span>
           </div>
+
           <a
             ref={launchBtnRef}
             className="px-space-lg py-space-sm bg-primary-container/15 hover:bg-primary-container text-primary hover:text-on-primary-fixed font-label-lg text-label-lg rounded transition-all shadow-[0_0_14px_rgba(0,240,255,0.25)] flex items-center gap-space-xs border border-cyan-400/40 font-bold"

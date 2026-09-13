@@ -5,11 +5,14 @@
     background-color: #0d141d;
     color: #dce3f0;
     scroll-behavior: auto !important; /* Managed by Lenis */
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   body {
     overscroll-behavior-y: none;
   }
 }
+
+
 
 /* Custom Tactical Scrollbar */
 ::-webkit-scrollbar {
@@ -85,6 +88,79 @@
 
 .sonar-echo-ring {
   animation: sonar-ring-expand 3s cubic-bezier(0.1, 0.6, 0.2, 1) infinite;
+}
+
+/* Cybernetic Scout Fish Animations (Skiper19) */
+@keyframes fish-tail-swim {
+  0%, 100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes fish-fin-flutter-left {
+  0%, 100% {
+    transform: rotate(-8deg) scaleY(0.95);
+  }
+  50% {
+    transform: rotate(12deg) scaleY(1.08);
+  }
+}
+
+@keyframes fish-fin-flutter-right {
+  0%, 100% {
+    transform: rotate(8deg) scaleY(0.95);
+  }
+  50% {
+    transform: rotate(-12deg) scaleY(1.08);
+  }
+}
+
+@keyframes fish-sonar-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes fish-bubble-wake {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.3);
+  }
+}
+
+.fish-swim-glow {
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.75)) drop-shadow(0 0 20px rgba(0, 240, 255, 0.35));
+}
+
+.fish-tail-animated {
+  transform-origin: 28px 24px;
+  animation: fish-tail-swim 1.1s ease-in-out infinite;
+}
+
+.fish-fin-left {
+  transform-origin: 20px 14px;
+  animation: fish-fin-flutter-left 1.4s ease-in-out infinite;
+}
+
+.fish-fin-right {
+  transform-origin: 20px 34px;
+  animation: fish-fin-flutter-right 1.4s ease-in-out infinite;
+}
+
+.fish-ping-ring {
+  animation: fish-sonar-ping 2s cubic-bezier(0.1, 0.7, 0.2, 1) infinite;
 }
 
 /* CRT Scanline Overlay */

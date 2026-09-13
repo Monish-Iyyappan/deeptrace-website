@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './index.css';
 import { Header } from './components/Header';
+import { HomeAuthSection } from './components/HomeAuthSection';
 import { StickyStepper } from './components/StickyStepper';
 import { VerticalNavRail } from './components/VerticalNavRail';
 import { HeroSection } from './components/HeroSection';
@@ -10,16 +11,17 @@ import { PipelineStageCard } from './components/PipelineStageCard';
 import { TeamSection } from './components/TeamSection';
 import { Footer } from './components/Footer';
 import { ImagePopup } from './components/ImagePopup';
-import { MemberSignInModal } from './components/MemberSignInModal';
 import { CustomCursor } from './components/CustomCursor';
 import { PIPELINE_STAGES, TEAM_MEMBERS, MISSION_METRICS } from './data/pipelineData';
 import { LightboxImage } from './types';
+import { Skiper90Button } from './components/ui/Skiper90';
+import { Skiper84 } from './components/ui/Skiper84';
+import { Skiper19 } from './components/ui/Skiper19';
 import {
   initSmoothScroll,
   scrollToTarget,
   attachMagneticEffect,
   attachSpotlight,
-  attachCardTilt,
   isReducedMotion
 } from './utils/motion';
 
@@ -28,11 +30,12 @@ gsap.registerPlugin(ScrollTrigger);
 const SESSION_STORAGE_KEY = 'deeptrace_auth_member_id';
 
 export const App: React.FC = () => {
+  const [hasEntered, setHasEntered] = useState<boolean>(false);
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
   const [lightboxImage, setLightboxImage] = useState<LightboxImage | null>(null);
-  const [isSignInModalOpen, setIsSignInModalOpen] = useState<boolean>(false);
   const [signedInMemberId, setSignedInMemberId] = useState<string | null>(null);
 
+  const pipelineSectionRef = useRef<HTMLElement>(null);
   const deploymentCtaRef = useRef<HTMLDivElement>(null);
   const ctaCloneBtnRef = useRef<HTMLAnchorElement>(null);
 
@@ -42,38 +45,36 @@ export const App: React.FC = () => {
     return () => cleanupScroll();
   }, []);
 
-  // Restore authenticated member session from sessionStorage on load
+  // Ensure all member statuses start as UNACTIVE on website load/entry and clear on exit
   useEffect(() => {
     try {
-      const savedMemberId = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      if (savedMemberId && TEAM_MEMBERS.some((m) => m.id === savedMemberId)) {
-        setSignedInMemberId(savedMemberId);
-      }
-    } catch {
-      // Ignore sessionStorage security/quota errors
-    }
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    } catch {}
+
+    const handleBeforeUnload = () => {
+      try {
+        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch {}
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const handleSignIn = (memberId: string) => {
     setSignedInMemberId(memberId);
-    try {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, memberId);
-    } catch {
-      // Ignore sessionStorage errors
-    }
   };
 
   const handleSignOut = () => {
     setSignedInMemberId(null);
-    try {
-      sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    } catch {
-      // Ignore sessionStorage errors
-    }
   };
 
   // Update active step index based on scroll position
   useEffect(() => {
+    if (!hasEntered) return;
+
     const handleScroll = () => {
       const scrollPos = window.scrollY + window.innerHeight / 3;
       let currentIndex = 0;
@@ -96,26 +97,64 @@ export const App: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [hasEntered]);
 
-  // Deployment CTA card enhancements (spotlight + 3D tilt + magnetic clone button + ScrollTrigger reveal)
+  // Deployment CTA card enhancements (spotlight + Skiper17 rotation entrance + hover alignment + magnetic clone button)
   useEffect(() => {
-    const cleanupSpotlight = attachSpotlight(deploymentCtaRef.current);
-    const cleanupTilt = attachCardTilt(deploymentCtaRef.current, 4);
+    if (!hasEntered || !deploymentCtaRef.current) return;
+
+    const ctaEl = deploymentCtaRef.current;
+    const initialRot = -1.5;
+
+    const cleanupSpotlight = attachSpotlight(ctaEl);
     const cleanupMagnetic = attachMagneticEffect(ctaCloneBtnRef.current, 0.2);
 
+    // Initial resting rotation
+    gsap.set(ctaEl, { rotation: initialRot, transformOrigin: 'center center' });
+
+    // Hover listeners to align to 0deg and return to initialRot
+    const handleMouseEnter = () => {
+      gsap.to(ctaEl, {
+        rotation: 0,
+        scale: 1.015,
+        duration: 0.35,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(ctaEl, {
+        rotation: initialRot,
+        scale: 1,
+        duration: 0.45,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    };
+
+    ctaEl.addEventListener('mouseenter', handleMouseEnter);
+    ctaEl.addEventListener('mouseleave', handleMouseLeave);
+
     let trigger: ScrollTrigger | null = null;
-    if (!isReducedMotion() && deploymentCtaRef.current) {
+    if (!isReducedMotion()) {
       const anim = gsap.fromTo(
-        deploymentCtaRef.current,
-        { opacity: 0, y: 35 },
+        ctaEl,
+        {
+          opacity: 0,
+          y: 45,
+          rotation: -4.5,
+          scale: 0.96
+        },
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
+          rotation: initialRot,
+          scale: 1,
+          duration: 0.85,
           ease: 'power2.out',
           scrollTrigger: {
-            trigger: deploymentCtaRef.current,
+            trigger: ctaEl,
             start: 'top 85%',
             toggleActions: 'play none none none'
           }
@@ -126,19 +165,70 @@ export const App: React.FC = () => {
 
     return () => {
       cleanupSpotlight();
-      cleanupTilt();
       cleanupMagnetic();
+      ctaEl.removeEventListener('mouseenter', handleMouseEnter);
+      ctaEl.removeEventListener('mouseleave', handleMouseLeave);
       if (trigger) trigger.kill();
     };
-  }, []);
+  }, [hasEntered]);
 
   const signedInMember = TEAM_MEMBERS.find((m) => m.id === signedInMemberId) || null;
 
+  // PAGE 1: SEPARATE HOME / AUTHENTICATION PAGE
+  if (!hasEntered) {
+    return (
+      <div className="bg-background font-body-md text-on-surface min-h-screen relative overflow-x-hidden selection:bg-primary-container selection:text-on-primary-fixed flex flex-col justify-center">
+        {/* Ambient Radial and Grid Backgrounds */}
+        <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,240,255,0.06)_0%,transparent_60%)]"></div>
+        <div className="pointer-events-none fixed inset-0 z-0 opacity-20 bg-[linear-gradient(to_right,rgba(0,240,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,240,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"></div>
+        <Skiper84 />
+
+        {/* Top Left HUD Telemetry Tag */}
+        <div className="fixed top-space-xs left-space-md z-40 hidden lg:flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant font-mono">
+          <span className="text-primary-container">+</span>
+          <span>LAT: 44°07'12"N</span>
+          <span className="text-outline-variant">|</span>
+          <span>LON: 12°02'28"W</span>
+          <span className="text-outline-variant">|</span>
+          <span>DEPTH: -3840M</span>
+        </div>
+
+        {/* Top Right HUD Telemetry Tag */}
+        <div className="fixed top-space-xs right-space-md z-40 hidden lg:flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant font-mono">
+          <span>ACOUSTIC SIG: 842.19 kHz</span>
+          <span className="text-outline-variant">|</span>
+          <span className="text-primary-container">[ SYS // GATEWAY ]</span>
+          <span className="text-primary-container">+</span>
+        </div>
+
+        {/* The Standalone Home Page: Logo on Center-Left & Login Box on Center-Right */}
+        <HomeAuthSection
+          teamMembers={TEAM_MEMBERS}
+          signedInMemberId={signedInMemberId}
+          onSignIn={(memberId) => {
+            handleSignIn(memberId);
+            setHasEntered(true);
+          }}
+          onSignOut={handleSignOut}
+          onEnterAsGuest={() => {
+            handleSignOut();
+            setHasEntered(true);
+          }}
+        />
+
+        {/* Tactical HUD Custom Cursor */}
+        <CustomCursor />
+      </div>
+    );
+  }
+
+  // PAGE 2: SEPARATE MAIN WEB APPLICATION
   return (
     <div className="bg-background font-body-md text-on-surface min-h-screen relative overflow-x-hidden selection:bg-primary-container selection:text-on-primary-fixed">
       {/* Ambient Radial and Grid Backgrounds */}
       <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,240,255,0.06)_0%,transparent_60%)]"></div>
       <div className="pointer-events-none fixed inset-0 z-0 opacity-20 bg-[linear-gradient(to_right,rgba(0,240,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,240,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"></div>
+      <Skiper84 />
 
       {/* Top Left HUD Telemetry Tag */}
       <div className="fixed top-space-xs left-space-md z-40 hidden lg:flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant font-mono">
@@ -158,12 +248,15 @@ export const App: React.FC = () => {
         <span className="text-primary-container">+</span>
       </div>
 
-      {/* Main Top Header */}
+      {/* Main Top Header with Return to Home Support */}
       <Header
         signedInMember={signedInMember}
         onNavClick={(targetId) => scrollToTarget(targetId)}
-        onOpenSignInModal={() => setIsSignInModalOpen(true)}
+        onReturnHome={() => setHasEntered(false)}
       />
+
+      {/* Skiper19 Cybernetic Sonar Scout Fish — Swims from Logo to the End of the Page */}
+      <Skiper19 />
 
       <main className="w-full pt-20 bg-surface relative z-10">
         <div className="flex flex-col w-full">
@@ -191,7 +284,10 @@ export const App: React.FC = () => {
           />
 
           {/* 11 Pipeline Stages */}
-          <section className="w-full px-margin-desktop py-space-xl max-w-7xl mx-auto space-y-space-4xl">
+          <section
+            ref={pipelineSectionRef}
+            className="relative w-full px-margin-desktop py-space-xl max-w-7xl mx-auto space-y-space-4xl"
+          >
             {PIPELINE_STAGES.map((stage, index) => {
               const nextStage = PIPELINE_STAGES[index + 1];
               return (
@@ -238,18 +334,18 @@ export const App: React.FC = () => {
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-space-md">
-                <a
+                <Skiper90Button
                   ref={ctaCloneBtnRef}
-                  className="px-space-xl py-space-md bg-primary-container text-on-primary-fixed font-label-lg text-label-lg rounded font-bold hover:bg-primary-fixed transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-space-sm font-mono"
+                  variant="primary"
                   href="https://github.com/Monish-Iyyappan/sonar-deeptrace-demo.git"
                   rel="noopener noreferrer"
                   target="_blank"
                 >
                   <span className="material-symbols-outlined text-base">code</span>
                   <span>CLONE GITHUB REPOSITORY</span>
-                </a>
-                <a
-                  className="px-space-xl py-space-md bg-surface-container hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg rounded transition-colors flex items-center gap-space-sm border border-cyan-500/25 cursor-pointer font-mono"
+                </Skiper90Button>
+                <Skiper90Button
+                  variant="secondary"
                   href="#step-01"
                   onClick={(e) => {
                     e.preventDefault();
@@ -258,7 +354,7 @@ export const App: React.FC = () => {
                 >
                   <span className="material-symbols-outlined text-base text-primary-container">radar</span>
                   <span>EXPLORE PIPELINE</span>
-                </a>
+                </Skiper90Button>
               </div>
 
               <div className="mt-space-2xl pt-space-md border-t border-outline-variant/20 w-full flex flex-col md:flex-row items-center justify-between text-on-surface-variant font-label-sm text-label-sm gap-space-xs font-mono text-[10px]">
@@ -275,6 +371,7 @@ export const App: React.FC = () => {
           <TeamSection
             signedInMemberId={signedInMemberId}
             teamMembers={TEAM_MEMBERS}
+            onOpenSignInModal={() => setHasEntered(false)}
           />
         </div>
       </main>
@@ -286,16 +383,6 @@ export const App: React.FC = () => {
       <ImagePopup
         image={lightboxImage}
         onClose={() => setLightboxImage(null)}
-      />
-
-      {/* Member Sign-In Modal */}
-      <MemberSignInModal
-        isOpen={isSignInModalOpen}
-        signedInMemberId={signedInMemberId}
-        teamMembers={TEAM_MEMBERS}
-        onClose={() => setIsSignInModalOpen(false)}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
       />
 
       {/* Tactical HUD Custom Cursor */}

@@ -34,13 +34,15 @@ export interface PipelineStage {
 
 export interface TeamMember {
   id: string;
-  step: string;
-  roleTitle: string;
   name: string;
-  specialty: string;
-  description: string;
-  callsign: string;
-  status: 'VERIFIED' | 'DEPLOYED' | 'ACTIVE' | 'STANDBY';
+  username: string;
+  password?: string;
+  step?: string;
+  roleTitle?: string;
+  specialty?: string;
+  description?: string;
+  callsign?: string;
+  status?: 'VERIFIED' | 'DEPLOYED' | 'ACTIVE' | 'STANDBY';
 }
 
 export interface MissionMetric {

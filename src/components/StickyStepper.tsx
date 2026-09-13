@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { PipelineStage } from '../types';
+import { Skiper58 } from './ui/Skiper58';
 
 interface StickyStepperProps {
   stages: PipelineStage[];
@@ -80,14 +81,11 @@ export const StickyStepper: React.FC<StickyStepperProps> = ({
               const isPast = index < activeStepIndex;
               
               let nodeColor = 'bg-surface-variant text-on-surface-variant ring-surface-variant/50';
-              let textColor = 'text-on-surface-variant';
 
               if (isCurrent) {
                 nodeColor = 'bg-primary-container text-on-primary-fixed ring-primary-container/40 shadow-[0_0_10px_rgba(0,240,255,0.4)]';
-                textColor = 'text-primary-container';
               } else if (isPast) {
                 nodeColor = 'bg-[#152332] text-cyan-200 ring-cyan-500/30';
-                textColor = 'text-cyan-200/80';
               }
 
               return (
@@ -110,9 +108,11 @@ export const StickyStepper: React.FC<StickyStepperProps> = ({
                   >
                     {stage.stepNumber}
                   </span>
-                  <span className={`font-label-sm text-[9px] font-mono tracking-tight ${textColor} ${isCurrent ? 'font-bold underline decoration-cyan-400 underline-offset-2' : ''}`}>
-                    {stage.category}
-                  </span>
+                  <Skiper58
+                    text={stage.category}
+                    active={isCurrent}
+                    className="text-[9px] tracking-tight font-mono"
+                  />
                 </a>
               );
             })}

@@ -2,48 +2,56 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TeamMember } from '../types';
-import { attachSpotlight, attachCardTilt, isReducedMotion } from '../utils/motion';
+import { attachSpotlight, isReducedMotion } from '../utils/motion';
+import { Skiper17Card } from './ui/Skiper17';
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
   signedInMemberId?: string | null;
+  onOpenSignInModal?: (memberId?: string) => void;
 }
 
 export const TeamSection: React.FC<TeamSectionProps> = ({
   teamMembers,
-  signedInMemberId
+  signedInMemberId,
+  onOpenSignInModal
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Attach spotlight and 3D tilt to each team card
+    // Attach spotlight cursor glow to each team card
     const cleanups = cardRefs.current.map((card) => {
       if (card) {
-        const cleanupSpotlight = attachSpotlight(card);
-        const cleanupTilt = attachCardTilt(card, 5);
-        return () => {
-          cleanupSpotlight();
-          cleanupTilt();
-        };
+        return attachSpotlight(card);
       }
       return () => {};
     });
 
-    // Staggered reveal for team cards
+    // Staggered reveal for team cards with Skiper17 rotational swing
     let trigger: ScrollTrigger | null = null;
     if (!isReducedMotion() && containerRef.current) {
       const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
+      const restAngles = [-4.5, 3.5, -3.5, 3.5, -2.5, 3.5];
+      const startAngles = [-9, 8, -8, 8, -7, 8];
+
       const anim = gsap.fromTo(
         cards,
-        { opacity: 0, y: 30 },
+        {
+          opacity: 0,
+          y: 45,
+          rotation: (i) => startAngles[i % startAngles.length],
+          scale: 0.94
+        },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.12,
+          rotation: (i) => restAngles[i % restAngles.length],
+          scale: 1,
+          duration: 0.85,
+          stagger: 0.1,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: containerRef.current,
@@ -61,99 +69,75 @@ export const TeamSection: React.FC<TeamSectionProps> = ({
     };
   }, []);
 
-  const getStatusBadge = (member: TeamMember) => {
-    // Override badge if this member is signed in
-    if (signedInMemberId && member.id === signedInMemberId) {
-      return (
-        <span className="text-primary-container font-bold font-mono shadow-[0_0_10px_rgba(0,240,255,0.9)] animate-pulse flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary-container inline-block"></span>
-          <span>ACTIVE</span>
-        </span>
-      );
-    }
-
-    switch (member.status) {
-      case 'VERIFIED':
-        return <span className="text-primary-container font-bold font-mono shadow-[0_0_6px_rgba(0,240,255,0.6)]">VERIFIED</span>;
-      case 'DEPLOYED':
-        return <span className="text-tertiary-fixed-dim font-bold font-mono shadow-[0_0_6px_rgba(255,185,82,0.6)]">DEPLOYED</span>;
-      case 'ACTIVE':
-        return <span className="text-primary-container font-bold font-mono">ACTIVE</span>;
-      case 'STANDBY':
-        return <span className="text-outline-variant font-bold font-mono">STANDBY</span>;
-    }
-  };
-
   return (
     <section
       ref={containerRef}
       className="w-full px-margin-desktop py-space-3xl max-w-7xl mx-auto scroll-mt-28"
       id="team-credits"
     >
-      <div className="flex flex-col gap-space-md mb-space-2xl">
-        <div className="flex items-center gap-space-sm font-label-sm text-label-sm font-mono">
+      <div className="flex flex-col gap-space-md mb-space-2xl text-center items-center">
+        <div className="flex items-center gap-space-xs font-label-sm text-label-sm font-mono">
           <span className="text-primary-container font-bold">
-            [MISSION PERSONNEL // CREW &amp; CONTRIBUTORS]
+            [MISSION PERSONNEL // CREW CLEARANCE]
           </span>
           <span className="text-outline-variant">/</span>
           <span className="text-on-surface-variant">
-            PROJECT CLEARANCE TIER-1
+            TIER-1 ACCESS
           </span>
         </div>
-        <h2 className="font-headline-lg text-headline-lg text-primary uppercase font-orbitron">
+        <h2 className="font-headline-lg text-headline-lg text-primary uppercase font-orbitron tracking-wide">
           DEEPTRACE ARCHITECTURE TEAM
         </h2>
         <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
-          Core engineers and spatial intelligence contributors behind the
-          acoustic neural pipeline and autonomous payload framework.
+          Select any crew dossier to authenticate and activate mission clearance credentials.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
         {teamMembers.map((member, index) => {
           const isMemberActive = signedInMemberId === member.id;
 
           return (
-            <div
+            <Skiper17Card
               key={member.id}
+              index={index}
+              total={teamMembers.length}
+              isActive={isMemberActive}
               ref={(el) => (cardRefs.current[index] = el)}
-              className={`bg-[#091420]/80 backdrop-blur-md border rounded-xl p-5 font-mono flex flex-col justify-between transition-all duration-300 relative group overflow-hidden spotlight-card ${
+              onClick={() => onOpenSignInModal?.(member.id)}
+              className={`border rounded-2xl p-8 py-10 font-mono flex flex-col items-center justify-center gap-5 transition-all duration-300 relative group overflow-hidden spotlight-card cursor-pointer min-h-[170px] ${
                 isMemberActive
-                  ? 'border-cyan-400 shadow-[0_0_28px_rgba(0,240,255,0.3)] bg-[#0c1c2e]/90'
-                  : 'border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_24px_rgba(0,240,255,0.18)]'
+                  ? 'bg-[#0c1f33]/95 border-cyan-400 shadow-[0_0_30px_rgba(0,240,255,0.35)]'
+                  : 'bg-[#091522]/90 hover:bg-[#0c1c2e]/95 border-cyan-500/25 hover:border-cyan-400/70 shadow-[0_0_20px_rgba(0,0,0,0.5)]'
               }`}
             >
-              <div className="space-y-space-sm">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] text-cyan-400 uppercase tracking-widest font-semibold">
-                    {member.step} // {member.roleTitle}
-                  </div>
-                  {isMemberActive && (
-                    <span className="text-[9px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 font-bold">
-                      AUTHENTICATED
-                    </span>
-                  )}
-                </div>
-                
-                <div className="text-base font-bold text-on-surface tracking-wider font-orbitron flex items-center gap-2">
-                  <span>{member.name}</span>
-                </div>
-                <div className="text-xs text-secondary-fixed">
-                  {member.specialty}
-                </div>
-                <p className="text-[12px] text-slate-300 pt-space-xs leading-relaxed font-sans">
-                  {member.description}
-                </p>
+              {/* Ambient Card Radial Glow Blob */}
+              <div className="absolute -top-12 -right-12 w-36 h-36 bg-primary-container/10 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Team Member Name ONLY */}
+              <div className="text-base sm:text-lg md:text-xl font-bold text-slate-100 tracking-wider font-orbitron text-center uppercase group-hover:text-cyan-300 transition-colors">
+                {member.name}
               </div>
 
-              <div className="pt-4 mt-4 border-t border-cyan-500/15 flex items-center justify-between text-[10px] text-outline">
-                <span>CALLSIGN: {member.callsign}</span>
-                {getStatusBadge(member)}
+              {/* Active / Unactive Spot Indicator */}
+              <div className="flex items-center justify-center">
+                {isMemberActive ? (
+                  <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-bold font-mono text-xs shadow-[0_0_12px_rgba(0,240,255,0.5)] animate-pulse">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,240,255,1)]" />
+                    <span>ACTIVE</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#060e18]/80 border border-slate-700/60 text-slate-400 font-medium font-mono text-xs group-hover:border-cyan-500/40 group-hover:text-slate-300 transition-colors">
+                    <span className="w-2 h-2 rounded-full bg-slate-500 group-hover:bg-slate-400 transition-colors" />
+                    <span>UNACTIVE</span>
+                  </div>
+                )}
               </div>
-            </div>
+            </Skiper17Card>
           );
         })}
       </div>
     </section>
   );
 };
+

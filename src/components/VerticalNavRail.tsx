@@ -1,5 +1,5 @@
-import React from 'react';
 import { PipelineStage } from '../types';
+import { Skiper58 } from './ui/Skiper58';
 
 interface VerticalNavRailProps {
   stages: PipelineStage[];
@@ -35,8 +35,9 @@ export const VerticalNavRail: React.FC<VerticalNavRailProps> = ({
         return (
           <div key={stage.id} className="relative group flex items-center justify-end">
             {/* Tactical Micro-Tooltip (Hover left of node) */}
-            <div className="pointer-events-none absolute right-full mr-2 px-2.5 py-1 rounded bg-[#091420]/95 border border-cyan-400/40 text-[10px] font-mono text-cyan-200 opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-[0_0_12px_rgba(0,240,255,0.2)] z-50 translate-x-1 group-hover:translate-x-0">
-              <span className="text-primary-container font-bold">[{stage.stepNumber}]</span> {stage.title}
+            <div className="pointer-events-none absolute right-full mr-2 px-2.5 py-1 rounded bg-[#091420]/95 border border-cyan-400/40 text-[10px] font-mono text-cyan-200 opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap shadow-[0_0_12px_rgba(0,240,255,0.2)] z-50 translate-x-1 group-hover:translate-x-0 flex items-center gap-1">
+              <span className="text-primary-container font-bold">[{stage.stepNumber}]</span>
+              <Skiper58 text={stage.title} active={isActive} />
             </div>
 
             <a

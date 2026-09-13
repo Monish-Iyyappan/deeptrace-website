@@ -341,68 +341,56 @@ export const PIPELINE_STAGES: PipelineStage[] = [
 export const TEAM_MEMBERS: TeamMember[] = [
   {
     id: 'member-01',
-    step: '01',
-    roleTitle: 'PROJECT LEAD & ACOUSTIC ML',
     name: 'MONISH IYYAPPAN',
-    specialty: 'Lead Deep-Sea ML Architect & Systems Engineering',
-    description:
-      'Ghost net segmentation model, telemetry ingestion & pipeline design.',
-    callsign: 'LEAD-01',
-    status: 'VERIFIED'
+    username: 'monish iyyappan',
+    password: 'monish@iyyappan',
+    callsign: 'MONISH',
+    roleTitle: 'MISSION SPECIALIST',
+    status: 'STANDBY'
   },
   {
     id: 'member-02',
-    step: '02',
-    roleTitle: 'EMBEDDED HARDWARE',
-    name: '[TEAM MEMBER 02]',
-    specialty: 'Edge Compute & Submersible Integration',
-    description:
-      'Jetson Orin Nano integration, IP68 enclosure & acoustic pings.',
-    callsign: 'NODE-02',
-    status: 'DEPLOYED'
+    name: 'SAI JAIWANT',
+    username: 'sai jaiwant',
+    password: 'sai@jaiwant',
+    callsign: 'SAI',
+    roleTitle: 'MISSION SPECIALIST',
+    status: 'STANDBY'
   },
   {
     id: 'member-03',
-    step: '03',
-    roleTitle: 'NAVIGATION & SENSORS',
-    name: '[TEAM MEMBER 03]',
-    specialty: 'Bathymetric Cartography & PostGIS',
-    description:
-      'USBL beacon coordinate transforms & 3D point-cloud mapping.',
-    callsign: 'CART-03',
-    status: 'DEPLOYED'
+    name: 'MONISHA MURUGAN',
+    username: 'monisha murugan',
+    password: 'monisha@murugan',
+    callsign: 'M-MURUGAN',
+    roleTitle: 'MISSION SPECIALIST',
+    status: 'STANDBY'
   },
   {
     id: 'member-04',
-    step: '04',
-    roleTitle: 'FLIGHT INTERACTION',
-    name: '[TEAM MEMBER 04]',
-    specialty: 'Mission Telemetry & HUD Cockpit',
-    description:
-      'High-performance WebGL waterfall interface & salvage dispatch.',
-    callsign: 'FLT-04',
-    status: 'ACTIVE'
+    name: 'MONISHA SATHISH',
+    username: 'monisha sathish',
+    password: 'monisha@sathish',
+    callsign: 'M-SATHISH',
+    roleTitle: 'MISSION SPECIALIST',
+    status: 'STANDBY'
   },
   {
     id: 'member-05',
-    step: '05',
-    roleTitle: 'ACOUSTIC SIGNAL PROCESSING',
-    name: '[TEAM MEMBER 05]',
-    specialty: 'Sonar Beamforming & DSP Engineer',
-    description:
-      'Slant-range correction, Lee & Frost speckle filters, and TVG normalization.',
-    callsign: 'SIG-05',
-    status: 'DEPLOYED'
+    name: 'MANISHA V',
+    username: 'manisha v',
+    password: 'manisha@v',
+    callsign: 'MANISHA',
+    roleTitle: 'MISSION SPECIALIST',
+    status: 'STANDBY'
   },
   {
     id: 'member-06',
-    step: '06',
-    roleTitle: 'DEEP-SEA EMBEDDED COMMS',
-    name: '[TEAM MEMBER 06]',
-    specialty: 'Autonomous Navigation & USBL Telemetry',
-    description:
-      'Extended Kalman Filter daemon, acoustic transponder sync & failsafe protocol.',
-    callsign: 'AUV-06',
+    name: 'MONISHA VENKATESAN',
+    username: 'monisha venkatesan',
+    password: 'monisha@venkatesan',
+    callsign: 'M-VENKATESAN',
+    roleTitle: 'MISSION SPECIALIST',
     status: 'STANDBY'
   }
 ];
