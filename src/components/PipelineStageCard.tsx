@@ -109,14 +109,15 @@ export const PipelineStageCard: React.FC<PipelineStageCardProps> = ({
 
   const getStatusBadge = () => {
     return (
-      <span className="px-space-sm py-space-2xs rounded bg-surface-variant text-on-surface-variant font-bold border border-outline-variant/40 font-mono text-[10px] tracking-wider">
-        QUEUED FOR RELEASE
+      <span className="px-space-sm py-space-2xs rounded bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-400/40 font-mono text-[10px] tracking-wider shadow-[0_0_8px_rgba(0,240,255,0.2)] flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#00F0FF] animate-pulse" />
+        <span>ACTIVE // TIER-1 VERIFIED</span>
       </span>
     );
   };
 
   const getStatusDotColor = () => {
-    return 'bg-surface-variant';
+    return 'bg-cyan-400 shadow-[0_0_8px_rgba(0,240,255,0.8)]';
   };
 
   /* FEATURED FULL-VIEWPORT STAGE TAKEOVER */

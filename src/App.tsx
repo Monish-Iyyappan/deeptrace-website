@@ -244,7 +244,7 @@ export const App: React.FC = () => {
       <div className="fixed top-space-xs right-space-md z-40 hidden lg:flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant font-mono">
         <span>ACOUSTIC SIG: 842.19 kHz</span>
         <span className="text-outline-variant">|</span>
-        <span className="text-primary-container">[ SYS // NOMINAL ]</span>
+        <span className="text-primary-container">[ TIER-1 CLEARANCE // ALL ACCESS ]</span>
         <span className="text-primary-container">+</span>
       </div>
 

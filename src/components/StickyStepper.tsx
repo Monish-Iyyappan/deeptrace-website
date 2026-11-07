@@ -53,9 +53,9 @@ export const StickyStepper: React.FC<StickyStepperProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-space-md text-on-surface-variant font-mono text-[10px]">
-            <span className="flex items-center gap-space-2xs">
-              <span className="w-2 h-2 rounded-full bg-surface-variant border border-outline-variant/60 inline-block"></span>{' '}
-              QUEUED FOR RELEASE (ALL STAGES)
+            <span className="flex items-center gap-space-2xs text-cyan-300">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,240,255,0.8)] inline-block animate-pulse"></span>{' '}
+              TIER-1 CLEARANCE // ALL 11 STAGES ACTIVE
             </span>
           </div>
         </div>

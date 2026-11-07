@@ -88,12 +88,14 @@ export const Header: React.FC<HeaderProps> = ({
                   DEEPTRACE
                 </span>
                 {signedInMember ? (
-                  <span className="font-label-sm text-[9px] px-1.5 py-0.5 bg-cyan-500/20 text-cyan-300 rounded border border-cyan-400/40 font-bold animate-pulse">
-                    [{signedInMember.callsign}]
+                  <span className="font-label-sm text-[9px] px-2 py-0.5 bg-cyan-500/20 text-cyan-300 rounded border border-cyan-400/50 font-bold animate-pulse flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#00F0FF]" />
+                    <span>[{signedInMember.callsign} // TIER-1]</span>
                   </span>
                 ) : (
-                  <span className="font-label-sm text-label-sm px-space-xs py-space-2xs bg-surface-container-high rounded text-secondary-fixed-dim border border-cyan-500/20 group-hover:border-cyan-400/40 transition-colors">
-                    V0.1
+                  <span className="font-label-sm text-[9px] px-2 py-0.5 bg-cyan-500/15 text-cyan-300 rounded border border-cyan-400/40 font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(0,240,255,0.2)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#00F0FF]" />
+                    <span>[TIER-1 ACCESS // FULL PLATFORM]</span>
                   </span>
                 )}
               </div>
